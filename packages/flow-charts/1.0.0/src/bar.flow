@@ -1,0 +1,32 @@
+module Bar (Bar, Chart) where
+
+-- flow-charts 1.0.0 — a tiny, dependency-free bar chart.
+import List (map, fold)
+import Math (maxInt)
+
+Bar :: { label :: Str, value :: Int, max :: Int } -> Html
+Bar props =
+  <div class="bar">
+    <span class="bar-label">{props.label}</span>
+    <span class="bar-track">
+      <span class="bar-fill" style={width props.value props.max} />
+    </span>
+    <span class="bar-value">{props.value}</span>
+  </div>
+
+width :: Int -> Int -> Str
+width value max = do
+  let pct = if max <= 0 then 0 else value * 100 / max
+  "width:" + str pct + "%"
+
+maxOf :: List Int -> Int
+maxOf xs = fold xs 1 (\(acc :: Int) (x :: Int) -> maxInt acc x)
+
+Chart :: { title :: Str, bars :: List (Str, Int) } -> Html
+Chart props = do
+  let values = map props.bars (\(b :: (Str, Int)) -> b.1)
+  let top = maxOf values
+  <figure class="chart">
+    <figcaption class="chart-title">{props.title}</figcaption>
+    {map props.bars (\(b :: (Str, Int)) -> <Bar label={b.0} value={b.1} max={top} />)}
+  </figure>
